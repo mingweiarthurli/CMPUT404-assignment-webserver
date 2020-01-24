@@ -110,20 +110,21 @@ class MyWebServer(socketserver.BaseRequestHandler):
             with open(path, 'r') as rfile:
                 rfile_data = rfile.read()
 
-            reply = 'HTTP/1.1 200 OK\r\nContent-Length: ' + str(content_length) + '\r\nContent-Type: ' + mime_type + '\r\n\r\n' + rfile_data
+            response = 'HTTP/1.1 200 OK\r\nContent-Length: ' + str(content_length) + '\r\nContent-Type: ' + mime_type + '\r\n\r\n' + rfile_data
         except Exception as e:
             code, info = e.args
             
             if code == 405:
-                reply = 'HTTP/1.1 405 Method Not Allowed'
+                body = '<!doctype html><title>405 Method Not Allowed</title><h1>405 Method Not Allowed</h1>Only GET allowed'
+                response = 'HTTP/1.1 405 Method Not Allowed\r\nContent-Length: ' + str(len(body.encode('utf-8'))) + '\r\nContent-Type: text/html\r\n\r\n' + body
             elif code == 301:
                 body = '<!doctype html><title>301 Moved Permanently</title><h1>301 Moved Permanently</h1>The document has moved<A HREF=\"' + info + '\">here</A>'
-                reply = 'HTTP/1.1 301 Moved Permanently\r\nLocation: ' + info + '\r\nContent-Length: ' + str(len(body.encode('utf-8'))) + '\r\nContent-Type: text/html\r\n\r\n' + body
+                response = 'HTTP/1.1 301 Moved Permanently\r\nLocation: ' + info + '\r\nContent-Length: ' + str(len(body.encode('utf-8'))) + '\r\nContent-Type: text/html\r\n\r\n' + body
             elif code == 404:
-                body = '<!doctype html><title>404 Not Found</title><h1>404 Not Found</h1>The document has moved'
-                reply = 'HTTP/1.1 404 Not Found\r\nContent-Length: ' + str(len(body.encode('utf-8'))) + '\r\nContent-Type: text/html\r\n\r\n' + body
+                body = '<!doctype html><title>404 Not Found</title><h1>404 Not Found</h1>'
+                response = 'HTTP/1.1 404 Not Found\r\nContent-Length: ' + str(len(body.encode('utf-8'))) + '\r\nContent-Type: text/html\r\n\r\n' + body
         finally:
-            self.request.sendall(bytearray(reply,'utf-8'))
+            self.request.sendall(bytearray(response,'utf-8'))
 
 if __name__ == "__main__":
     HOST, PORT = "localhost", 8080
